@@ -59,6 +59,7 @@ import java.nio.charset.StandardCharsets;
 import java.awt.Dimension;
 import java.io.File;
 import java.util.Scanner; // For user inputs
+import java.util.HashSet; // For hashsets
 import javax.swing.*; 
 import java.awt.*;
 import java.awt.event.*;
