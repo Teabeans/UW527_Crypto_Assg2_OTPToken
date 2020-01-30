@@ -57,7 +57,7 @@ import java.security.NoSuchAlgorithmException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.io.File;
-import java.util.Scanner;
+import java.util.Scanner; // For user inputs
 
 public class Main {
 
@@ -80,10 +80,72 @@ public class Main {
   // into usable form.
 
   public static void main(String[] args) {
+
     String role = args[0];
-    if (DEBUG) {
-      System.out.println( "My role is: " + role );
+    if (!role.equals("SERVER") && !role.equals("CLIENT") && !role.equals("KEYGEN")) {
+      System.out.println( "Improper argument passed (" + args[0] + "). Halting..." );
+      System.exit(0);
     }
+    else {
+      if (DEBUG) {
+        System.out.println( "My role is: " + role );
+        System.out.println();
+      }
+    }
+
+// -------|---------|---------|---------|
+// SERVER
+// -------|---------|---------|---------|
+    if( role.equals( "SERVER" ) ) {
+      // Do SERVER things here
+    }
+
+// -------|---------|---------|---------|
+// CLIENT
+// -------|---------|---------|---------|
+    else if( role.equals( "CLIENT" ) ) {
+      // Do CLIENT things here
+    }
+
+// -------|---------|---------|---------|
+// KEYGEN
+// -------|---------|---------|---------|
+    else if( role.equals( "KEYGEN" ) ) {
+      // Do KEYGEN things here
+      Scanner userInput = new Scanner(System.in);
+      while( true ) {
+        System.out.println( "Enter 'OTP' to generate a One-Time Pass");
+        System.out.println( "  'T' to enter Test mode" );
+        System.out.println( "  'X' to eXit" );
+        String command = userInput.next();
+        if( command.equals("OTP") ) {
+          if( DEBUG ) {
+            System.out.println( "Generating an OTP..." );
+            System.out.println();
+          }
+          // Generate an OTP
+        }
+        else if( command.equals("T") ) {
+          if( DEBUG ) {
+            System.out.println( "Running a bajillion test OTPs..." );
+            System.out.println();
+          }
+          // Run a bajillion test OTPs and do metric stuff here
+        }
+        else if( command.equals( "X" ) ) {
+          if( DEBUG ) {
+            System.out.println( "Exiting..." );
+            System.out.println();
+          }
+          // Exit
+          System.exit(1);
+        }
+        else {
+          System.out.println( "Unrecognized input. Trying again..." );
+          System.out.println();
+        }
+      } // Closing while loop (should never be reached if entered)
+    } // Closing KEYGEN behavior
 
     if (DEBUG) {
       System.out.println("Retrieving initialization vector..." + "\n");
