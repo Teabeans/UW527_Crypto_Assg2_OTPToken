@@ -60,6 +60,9 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.Scanner; // For user inputs
 import java.util.HashSet; // For hashsets
+import java.util.Date; // For timestamps
+import java.text.SimpleDateFormat; // For formatting timestamp
+import java.time.Instant;
 import javax.swing.*; 
 import java.awt.*;
 import java.awt.event.*;
@@ -200,6 +203,41 @@ public class Main {
   // initGUI();
   } // Closing main()
 
+
+
+  /**
+   * Run a set of tests and calculate collision metrics
+   * 
+   * @param input The number of tests to execute when searching for a collision
+   * @return A double representing the collision rate for the number of tests
+   */
+  public static String OTPfromSeed( String seed ) {
+    boolean localDebug = false;
+    if( DEBUG && localDebug ) {
+      System.out.println( "Generating OTP from (" + seed + ")" );
+    }
+    byte[] sha2 = new byte[0];
+    StringBuilder hexString = null;
+    String retString = "";
+    try {
+      // SHA-2 the seed string
+      sha2 = generateSha2( seed );
+      // Convert SHA-2 to hexadecimal
+      hexString = generateHex(sha2);
+      // Truncate the hexadecimal string to make an OTP
+      retString = generateOtp(hexString.toString());
+    }
+    catch (Exception e) {
+      e.printStackTrace(System.out);
+    }
+    if( DEBUG && localDebug ) {
+      System.out.println( "OTP generated: " + retString );
+    }
+    // Send it back
+    return retString;
+  }
+
+
   /**
    * Run a set of tests and calculate collision metrics
    * 
@@ -217,7 +255,10 @@ public class Main {
     // Run the tests
     for( int i = 0 ; i < numTests ; i++ ) {
       // Make a new OTP - TODO Random string salted with timestamp
-      currOTP = generateOtp( "TODO" );
+      Instant instant = Instant.now();
+      String timeStamp = instant.toString();
+
+      currOTP = OTPfromSeed( timeStamp + Math.random() );
       // Check if this OTP has been seen before...
       if( hashTable.contains( currOTP ) ) {
         // Collision detected! Count it
