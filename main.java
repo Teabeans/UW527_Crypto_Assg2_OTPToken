@@ -76,7 +76,7 @@ public class Main {
   // -------|---------|---------|---------|---------|---------|---------|---------|
 
   static final boolean DEBUG = true;
-  static final int NUM_TESTS = 100;
+  static final int NUM_TESTS = 1000000;
 
   // -------|---------|---------|---------|---------|---------|---------|---------|
   //
