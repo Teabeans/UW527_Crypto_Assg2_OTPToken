@@ -195,6 +195,51 @@ public class Main {
   } // Closing main()
 
   /**
+   * Run a set of tests and calculate collision metrics
+   * 
+   * @param input The number of tests to execute when searching for a collision
+   * @return A double representing the collision rate for the number of tests
+   */
+  public static double testBattery( int numTests ) {
+    // Initialize variables
+    int numConsecutive = 0;
+    int numCollisions = 0;
+    HashSet<String> hashTable = new HashSet<String>();
+    String prevOTP = "";
+    String currOTP = "";
+
+    // Run the tests
+    for( int i = 0 ; i < numTests ; i++ ) {
+      // Make a new OTP - TODO Random string salted with timestamp
+      currOTP = generateOtp( "TODO" );
+      // Check if this OTP has been seen before...
+      if( hashTable.contains( currOTP ) ) {
+        // Collision detected! Count it
+        numCollisions++;
+        if( currOTP.equals( prevOTP ) ) {
+          // Is it also a consecutive collision? If so, count that
+          numConsecutive++;
+        }
+      }
+      // This OTP has not been observed yet
+      else { 
+        hashTable.add( currOTP );
+      }
+      // Done, get ready for next round
+      prevOTP = currOTP;
+    }
+    double collisionRate   = (double)numCollisions  / (double)numTests;
+    double consecutiveRate = (double)numConsecutive / (double)numTests;
+
+    if( DEBUG ) {
+      System.out.println( "Collision rate  : " + collisionRate   );
+      System.out.println( "Consecutive rate: " + consecutiveRate );
+    }
+
+    return collisionRate;
+  }
+  
+  /**
    * Retrieve the initialization vector for SHA-256 key generation.
    * 
    * @return The seed.
