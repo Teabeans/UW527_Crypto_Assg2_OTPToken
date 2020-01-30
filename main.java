@@ -119,7 +119,6 @@ public class Main {
     else if( role.equals( "KEYGEN" ) ) {
       // Do KEYGEN things here
       Scanner userInput = new Scanner(System.in);
-
       while( true ) {
         System.out.println( "Enter 'OTP' to generate a One-Time Pass");
         System.out.println( "  'T' to enter Test mode" );
@@ -138,6 +137,11 @@ public class Main {
             System.out.println();
           }
           // Run a bajillion test OTPs and do metric stuff here
+          // Must test:
+          //   - CR1 - The number of similar OTPs in bajillion tests
+          //   - CR2 - The number of -consecutive- similar OTPs in bajillion tests
+          double hitRate = testBattery( NUM_TESTS );
+          System.out.println( "Test battery results: " + (hitRate*100) + "%" );
         }
         else if( command.equals( "X" ) ) {
           if( DEBUG ) {
