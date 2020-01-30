@@ -56,8 +56,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.awt.Dimension;
 import java.io.File;
 import java.util.Scanner; // For user inputs
+import javax.swing.*; 
+import java.awt.*;
+import java.awt.event.*;
 
 public class Main {
 
@@ -80,6 +84,8 @@ public class Main {
   // into usable form.
 
   public static void main(String[] args) {
+    // args = new String[1];
+    // args[0] = "CLIENT";
 
     String role = args[0];
     if (!role.equals("SERVER") && !role.equals("CLIENT") && !role.equals("KEYGEN")) {
@@ -113,6 +119,7 @@ public class Main {
     else if( role.equals( "KEYGEN" ) ) {
       // Do KEYGEN things here
       Scanner userInput = new Scanner(System.in);
+
       while( true ) {
         System.out.println( "Enter 'OTP' to generate a One-Time Pass");
         System.out.println( "  'T' to enter Test mode" );
@@ -184,6 +191,7 @@ public class Main {
 
     }
 
+  // initGUI();
   } // Closing main()
 
   /**
@@ -247,5 +255,68 @@ public class Main {
     }
     return hexString;
   }
+
+   /**
+   * Initialize the graphical user interface.
+   */
+  private static void initGUI() {
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        createAndShowGUI();
+      }
+    });
+  }
+
+  // -------|---------|---------|---------|---------|---------|---------|---------|
+  //
+  // Graphical User Interface
+  //
+  // -------|---------|---------|---------|---------|---------|---------|---------|
+
+  /**
+   * Create and initialize the graphical user interface.
+   */
+  private static void createAndShowGUI() {
+    // JButtons
+    JButton btnOtp = new JButton("Generate OTP");
+    JButton btnTest = new JButton("Test OTP");
+
+    // JLabel
+    JLabel label = new JLabel("OTP");
+
+    // JPanel
+    JPanel panel = new JPanel();
+    panel.add(label);
+    panel.add(btnOtp);
+    panel.add(btnTest);
+
+    // JFrame
+    JFrame frame = new JFrame("Crypto OTP");
+    frame.getContentPane().add(panel);
+
+    // Action Listeners
+    btnOtp.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent evt) {
+        label.setText("Generate OTP Pressed");
+      }
+    });
+
+    btnTest.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent evt) {
+        label.setText("Test Pressed");
+      }
+    });
+
+    // Format GUI.
+    frame.setSize(500,500);
+    frame.setPreferredSize(new Dimension(400, 300));
+    frame.setLocationRelativeTo(null);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // Display window.
+    frame.pack();
+    frame.setVisible(true);
+}
 
 } // Closing class Main
