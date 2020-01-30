@@ -42,6 +42,9 @@
 // Compile with:
 // javac Main.java && java Main
 //
+// Note: Requires Java SDK installed to the Linux environment. Install with:
+// $ sudo apt-get update
+// $ sudo apt-get install openjdk-8-jdk
 
 //-------|---------|---------|---------|---------|---------|---------|---------|
 //
@@ -77,6 +80,11 @@ public class Main {
   // into usable form.
 
   public static void main(String[] args) {
+    String role = args[0];
+    if (DEBUG) {
+      System.out.println( "My role is: " + role );
+    }
+
     if (DEBUG) {
       System.out.println("Retrieving initialization vector..." + "\n");
     }
