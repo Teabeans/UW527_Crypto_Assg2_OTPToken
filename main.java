@@ -116,17 +116,9 @@ public class Main {
       String initVector = getIV();
       initServer( OTPbank, LOOKAHEAD, initVector );
       if( DEBUG ) {
-        System.out.println( "Contents of server OTP bank: " );
-        for( int i = 0 ; i < OTPbank.size() ; i++ ) {
-          System.out.print( "(" + i + "):" + OTPbank.get( i ) + " " );
-          if( i % 10 == 9 ) {
-            System.out.println();
-          }
-        }
-        System.out.println();
+        printOTPBuffer( OTPbank );
       }
 
-      
       Scanner userInput = new Scanner(System.in);
       while( true ) {
         System.out.println( "Please provide an OTP or 'X' to eXit: " );
@@ -152,14 +144,19 @@ public class Main {
             break;
           }
         }
-        if( DEBUG ) {
-          System.out.println( "Synchronization off expected by: (" + syncNumber + ") positions. Adjusting..." );
+
+        if( isFound == true ) {
+          System.out.println( "OTP found at pos(" + syncNumber + ")! Authentication accepted." );
+          if( DEBUG ) {
+            System.out.println( "Synchronization off expected by: (" + syncNumber + ") positions. Adjusting..." );
+          }
+          OTPsync( OTPbank, syncNumber ); // Must be called even with 0, since the bank should be advanced by 1
         }
-      }
-
-
-
-
+        else {
+          System.out.println( "Authentication error. OTP could not be validated. Buffer holding position." );
+        }
+        System.out.println();
+      } // Closing while loop
     } // Closing SERVER behavior
 
 // -------|---------|---------|---------|
@@ -255,7 +252,54 @@ public class Main {
   // initGUI();
   } // Closing main()
 
+  /**
+   * Print the contents of an OTP buffer
+   * 
+   * @param input The OTP buffer to print
+   * @return None
+   */
+  public static void printOTPBuffer( LinkedList<String> otpbank ) {
+    System.out.println( "Contents of server OTP lookahead buffer: " );
+    for( int i = 0 ; i < otpbank.size() ; i++ ) {
+      System.out.print( "(" + String.format( "%02d", i ) + "):" + otpbank.get( i ) + " " );
+      if( i % 10 == 9 ) {
+        System.out.println();
+      }
+    }
+    System.out.println();    
+  } // Closing printOTPBuffer
 
+  /**
+   * Synchronize an OTP buffer
+   * 
+   * @param input The OTP buffer to synchronize and the synchronization offset
+   * @return None
+   */
+  public static void OTPsync( LinkedList<String> otpbank, int offset ) {
+    if( DEBUG ) {
+      System.out.println( "Synchronizing OTP buffer by (" + offset + ") positions." );
+    }
+    int iterations = offset + 1;
+    // Perform the appends to the tail
+    for( int i = 0 ; i < iterations ; i++ ) {
+      String tailOTP = OTPfromSeed( otpbank.getLast() );
+      otpbank.addLast( tailOTP );
+    }
+    
+    // Remove extraneous from the front
+    for( int i = 0 ; i < iterations ; i++ ) {
+      String removal = otpbank.remove();
+      if( DEBUG ) {
+        System.out.println( "Removing head... " + removal );
+      }
+    }
+
+    if( DEBUG ) {
+      System.out.println( "Synchronization complete: " );
+      System.out.println( "Size of OTP buffer: " + otpbank.size() );
+      printOTPBuffer( otpbank );
+    }
+  }
 
   /**
    * Run a set of tests and calculate collision metrics
