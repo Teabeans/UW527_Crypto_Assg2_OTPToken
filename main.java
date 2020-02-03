@@ -60,6 +60,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.Scanner; // For user inputs
 import java.util.HashSet; // For hashsets
+import java.util.LinkedList; // For linked lists
 import java.util.Date; // For timestamps
 import java.text.SimpleDateFormat; // For formatting timestamp
 import java.time.Instant;
@@ -77,6 +78,7 @@ public class Main {
 
   static final boolean DEBUG = true;
   static final int NUM_TESTS = 1000000;
+  static final int LOOKAHEAD = 100;
 
   // -------|---------|---------|---------|---------|---------|---------|---------|
   //
@@ -109,8 +111,17 @@ public class Main {
 // -------|---------|---------|---------|
     if( role.equals( "SERVER" ) ) {
       // Do SERVER things here
-      String seed = "FOOBARBAZ"; // TODO: What does the server initialize the OTP seed from?
+      LinkedList<String> OTPbank = new LinkedList<String>();
       int currIteration = 0;
+      String initVector = getIV();
+      initServer( OTPbank, LOOKAHEAD, initVector );
+      if( DEBUG ) {
+        System.out.println( "Contents of server OTP bank: " );
+        for( int i = 0 ; i < OTPbank.size() ; i++ ) {
+          System.out.print( OTPbank.get( i ) + " " );
+        }
+        System.out.println();
+      }
     }
 
 // -------|---------|---------|---------|
@@ -239,6 +250,27 @@ public class Main {
     // Send it back
     return retString;
   }
+
+  /**
+   * Initialize the server OTP bank with a number of in-sequence OTPs
+   * 
+   * @param input The OTP bank to add the OTPs to
+   * @return None
+   */
+  public static void initServer( LinkedList<String> otpbank, int capacity, String seed ) {
+    if( DEBUG ) {
+      System.out.println( "Initializing server OTP bank." );
+      System.out.println( "Capacity: " + capacity );
+      System.out.println( "Seed    : " + seed );
+    }
+    String currOTP = OTPfromSeed( seed );
+    String prevOTP = "";
+    for( int i = 0 ; i < capacity ; i++ ) {
+      otpbank.addLast( currOTP );
+      prevOTP = currOTP;
+      currOTP = OTPfromSeed( prevOTP );
+    }
+  } // Closing initServer()
 
 
   /**
