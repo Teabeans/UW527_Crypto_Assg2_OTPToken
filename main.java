@@ -118,11 +118,49 @@ public class Main {
       if( DEBUG ) {
         System.out.println( "Contents of server OTP bank: " );
         for( int i = 0 ; i < OTPbank.size() ; i++ ) {
-          System.out.print( OTPbank.get( i ) + " " );
+          System.out.print( "(" + i + "):" + OTPbank.get( i ) + " " );
+          if( i % 10 == 9 ) {
+            System.out.println();
+          }
         }
         System.out.println();
       }
-    }
+
+      
+      Scanner userInput = new Scanner(System.in);
+      while( true ) {
+        System.out.println( "Please provide an OTP or 'X' to eXit: " );
+        String userOTP = userInput.next();
+
+        System.out.println( "User input received: " + userOTP );
+        if( userOTP.equals( "X" ) ) {
+          if( DEBUG ) {
+            System.out.println( "Exiting..." );
+            System.out.println();
+          }
+          // Exit
+          System.exit(1);
+        }
+
+        int syncNumber = 0;
+        boolean isFound = false;
+        for( int i = 0 ; i < OTPbank.size() ; i++ ) {
+          if( OTPbank.get(i).equals( userOTP ) ) {
+            // Match found!
+            syncNumber = i;
+            isFound = true;
+            break;
+          }
+        }
+        if( DEBUG ) {
+          System.out.println( "Synchronization off expected by: (" + syncNumber + ") positions. Adjusting..." );
+        }
+      }
+
+
+
+
+    } // Closing SERVER behavior
 
 // -------|---------|---------|---------|
 // CLIENT
