@@ -114,6 +114,8 @@ public class Main {
       LinkedList<String> OTPbank = new LinkedList<String>();
       int currIteration = 0;
       String initVector = getIV();
+
+      // Initialize the lookahead buffer
       initServer( OTPbank, LOOKAHEAD, initVector );
       if( DEBUG ) {
         printOTPBuffer( OTPbank );
@@ -122,18 +124,27 @@ public class Main {
       Scanner userInput = new Scanner(System.in);
       while( true ) {
         System.out.println( "Please provide an OTP or 'X' to eXit: " );
+        // Take the user input (their OTP)
         String userOTP = userInput.next();
+        if( DEBUG ) {
+          System.out.println( "User input received: " + userOTP );
+        }
 
-        System.out.println( "User input received: " + userOTP );
+    // -------|---------|---------|---------|
+    // EXIT CASE
+    // -------|---------|---------|---------|
         if( userOTP.equals( "X" ) ) {
           if( DEBUG ) {
             System.out.println( "Exiting..." );
             System.out.println();
           }
-          // Exit
           System.exit(1);
         }
 
+    // -------|---------|---------|---------|
+    // OTP CASE (Implied if not exit case)
+    // -------|---------|---------|---------|
+        // TODO: Error checks and short cirtcuits?
         int syncNumber = 0;
         boolean isFound = false;
         for( int i = 0 ; i < OTPbank.size() ; i++ ) {
@@ -173,18 +184,32 @@ public class Main {
     else if( role.equals( "KEYGEN" ) ) {
       // Do KEYGEN things here
       Scanner userInput = new Scanner(System.in);
+      String currOTP = "";
+      String prevOTP = getIV();
+
       while( true ) {
         System.out.println( "Enter 'OTP' to generate a One-Time Pass");
         System.out.println( "  'T' to enter Test mode" );
         System.out.println( "  'X' to eXit" );
         String command = userInput.next();
+    // -------|---------|---------|---------|
+    // OTP CASE
+    // -------|---------|---------|---------|
         if( command.equals("OTP") ) {
           if( DEBUG ) {
             System.out.println( "Generating an OTP..." );
             System.out.println();
           }
           // Generate an OTP
+          currOTP = OTPfromSeed( prevOTP );
+          prevOTP = currOTP;
+          System.out.println( "OTP generated: " + currOTP );
+          System.out.println();
         }
+
+    // -------|---------|---------|---------|
+    // TEST BATTERY CASE
+    // -------|---------|---------|---------|
         else if( command.equals("T") ) {
           if( DEBUG ) {
             System.out.println( "Running a bajillion test OTPs..." );
@@ -197,6 +222,10 @@ public class Main {
           double hitRate = testBattery( NUM_TESTS );
           System.out.println( "Test battery results: " + (hitRate*100) + "%" );
         }
+
+    // -------|---------|---------|---------|
+    // EXIT CASE
+    // -------|---------|---------|---------|
         else if( command.equals( "X" ) ) {
           if( DEBUG ) {
             System.out.println( "Exiting..." );
@@ -212,6 +241,9 @@ public class Main {
       } // Closing while loop (should never be reached if entered)
     } // Closing KEYGEN behavior
 
+
+
+    // TODO: Corpse code?
     if (DEBUG) {
       System.out.println("Retrieving initialization vector..." + "\n");
     }
