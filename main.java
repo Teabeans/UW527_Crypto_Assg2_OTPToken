@@ -215,11 +215,19 @@ public class Main {
             System.out.println( "Running a bajillion test OTPs..." );
             System.out.println();
           }
+          System.out.println( "Enter number of tests to run or 0 for Default: " );
+          int numtests = userInput.nextInt();
           // Run a bajillion test OTPs and do metric stuff here
           // Must test:
           //   - CR1 - The number of similar OTPs in bajillion tests
           //   - CR2 - The number of -consecutive- similar OTPs in bajillion tests
-          double hitRate = testBattery( NUM_TESTS );
+          double hitRate = 0.0;
+          if( numtests == 0 ) {
+            hitRate = testBattery( NUM_TESTS );
+          }
+          else {
+            hitRate = testBattery( numtests );
+          }
           System.out.println( "Test battery results: " + (hitRate*100) + "%" );
         }
 
@@ -365,6 +373,32 @@ public class Main {
     return retString;
   }
 
+  public static String fullHashFromSeed( String seed ) {
+    boolean localDebug = false;
+    if( DEBUG && localDebug ) {
+      System.out.println( "Generating full hash from (" + seed + ")" );
+    }
+    byte[] sha2 = new byte[0];
+    StringBuilder hexString = null;
+    String retString = "";
+    try {
+      // SHA-2 the seed string
+      sha2 = generateSha2( seed );
+      // Convert SHA-2 to hexadecimal
+      hexString = generateHex(sha2);
+      // Truncate the hexadecimal string to make an OTP
+      retString = hexString.toString();
+    }
+    catch (Exception e) {
+      e.printStackTrace(System.out);
+    }
+    if( DEBUG && localDebug ) {
+      System.out.println( "Full hash generated: " + retString );
+    }
+    // Send it back
+    return retString;
+  }
+
   /**
    * Initialize the server OTP bank with a number of in-sequence OTPs
    * 
@@ -395,47 +429,82 @@ public class Main {
    */
   public static double testBattery( int numTests ) {
     // Initialize variables
-    int numConsecutive = 0;
-    int numCollisions = 0;
-    HashSet<String> hashTable = new HashSet<String>();
+    int numConsecutiveOTPs   = 0;
+    int numOTPCollisions     = 0;
+    int numFullHashCollision = 0;
+    HashSet<String> fullHashTable = new HashSet<String>();
+    HashSet<String> otpHashTable  = new HashSet<String>();
+    boolean fullHashCycle = false;
+    String prevFullHash = "";
+    String currFullHash = "";
     String prevOTP = "";
     String currOTP = "";
 
     // Run the tests
-    // Start by initializing the "previous" OTP
+    // Start by initializing the "previous" full hash (this is the IV)
     Instant instant = Instant.now();
     String timeStamp = instant.toString();
-    prevOTP = OTPfromSeed( timeStamp + Math.random() );
+    String initVector = fullHashFromSeed(timeStamp + Math.random() );
+    prevFullHash = initVector;
 
     for( int i = 0 ; i < numTests ; i++ ) {
-      // Make a new OTP - Random string salted with timestamp
-      currOTP = OTPfromSeed( prevOTP );
-      // Check if this OTP has been seen before...
-      if( hashTable.contains( currOTP ) ) {
-        // Collision detected! Count it
-        numCollisions++;
-        if( currOTP.equals( prevOTP ) ) {
-          // Is it also a consecutive collision? If so, count that
-          numConsecutive++;
+      // Make a new full hash - Random string salted with timestamp
+      currFullHash = fullHashFromSeed( prevFullHash );
+      // Check if this full hash has been seen before...
+      if( fullHashTable.contains( currFullHash ) ) {
+        // Full hash collision detected! Halt; all further tests will be collisions
+        fullHashCycle = true;
+        numFullHashCollision = 1;
+        numTests = i;
+        System.out.println( "FULL HASH COLLISION detected on OTP (" + i + ") : " + currOTP );
+        System.out.println( "  - No further tests to be performed; all future hashes and OTPs will collide" );
+        break;
+      }
+      // Otherwise, this full hash has not been observed yet
+      else {
+        fullHashTable.add( currFullHash );
+        // So make the OTP from it and add to the observed OTP set
+        currOTP = OTPfromSeed( prevFullHash );
+        // Check for collision
+        if( otpHashTable.contains( currOTP ) ) {
+          // Count it
+          numOTPCollisions++;
+          // Do not add, but check if also a consecutive
+          if( currOTP.equals( prevOTP ) ) {
+            numConsecutiveOTPs++;
+          }
         }
+        else {
+          // No collision detected
+          otpHashTable.add( currOTP );
+        }
+        // Prep for the next round
+        prevOTP = currOTP;
+        prevFullHash = currFullHash;
       }
-      // This OTP has not been observed yet
-      else { 
-        hashTable.add( currOTP );
-      }
-      // Done, get ready for next round
-      prevOTP = currOTP;
     }
-    double collisionRate   = (double)numCollisions  / (double)numTests;
-    double consecutiveRate = (double)numConsecutive / (double)numTests;
+    double otpCollisionRate      = (double)numOTPCollisions     / (double)numTests;
+    double fullHashCollisionRate = (double)numFullHashCollision / (double)numTests;
+    double consecutiveRate       = (double)numConsecutiveOTPs   / (double)numTests;
 
     if( DEBUG ) {
-      System.out.println( "Collision rate   : " + collisionRate   );
-      System.out.println( "Consecutive rate : " + consecutiveRate );
-      System.out.println( "Consecutive count: " + numConsecutive  );
+      System.out.print( "Tests until full hash cycle: ");
+      if( fullHashCycle == false ) {
+        System.out.println( "Not found in (" + numTests + ") tests" );
+      }
+      else if( fullHashCycle == true ) {
+        System.out.println( numTests );
+      }
+      System.out.println( "Full hash collision rate   : " + fullHashCollisionRate );
+      System.out.println( "OTP Collision rate         : " + otpCollisionRate      );
+      System.out.println( "OTP Consecutives           : " + consecutiveRate       );
+      System.out.println( "Consecutive count          : " + numConsecutiveOTPs    );
+      System.out.println();
     }
 
-    return collisionRate;
+    // Alert bell that the tests are complete
+    System.out.print((char)7);
+    return otpCollisionRate;
   } // Closing testBattery()
   
   /**
