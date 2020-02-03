@@ -109,6 +109,8 @@ public class Main {
 // -------|---------|---------|---------|
     if( role.equals( "SERVER" ) ) {
       // Do SERVER things here
+      String seed = "FOOBARBAZ"; // TODO: What does the server initialize the OTP seed from?
+      int currIteration = 0;
     }
 
 // -------|---------|---------|---------|
@@ -116,6 +118,7 @@ public class Main {
 // -------|---------|---------|---------|
     else if( role.equals( "CLIENT" ) ) {
       // Do CLIENT things here
+      // Note: Client appears to be the same as the KEYGEN set of behaviors (sans collision tests)
     }
 
 // -------|---------|---------|---------|
@@ -253,12 +256,14 @@ public class Main {
     String currOTP = "";
 
     // Run the tests
-    for( int i = 0 ; i < numTests ; i++ ) {
-      // Make a new OTP - TODO Random string salted with timestamp
-      Instant instant = Instant.now();
-      String timeStamp = instant.toString();
+    // Start by initializing the "previous" OTP
+    Instant instant = Instant.now();
+    String timeStamp = instant.toString();
+    prevOTP = OTPfromSeed( timeStamp + Math.random() );
 
-      currOTP = OTPfromSeed( timeStamp + Math.random() );
+    for( int i = 0 ; i < numTests ; i++ ) {
+      // Make a new OTP - Random string salted with timestamp
+      currOTP = OTPfromSeed( prevOTP );
       // Check if this OTP has been seen before...
       if( hashTable.contains( currOTP ) ) {
         // Collision detected! Count it
@@ -279,12 +284,13 @@ public class Main {
     double consecutiveRate = (double)numConsecutive / (double)numTests;
 
     if( DEBUG ) {
-      System.out.println( "Collision rate  : " + collisionRate   );
-      System.out.println( "Consecutive rate: " + consecutiveRate );
+      System.out.println( "Collision rate   : " + collisionRate   );
+      System.out.println( "Consecutive rate : " + consecutiveRate );
+      System.out.println( "Consecutive count: " + numConsecutive  );
     }
 
     return collisionRate;
-  }
+  } // Closing testBattery()
   
   /**
    * Retrieve the initialization vector for SHA-256 key generation.
