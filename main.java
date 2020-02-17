@@ -79,6 +79,9 @@ public class Main {
   static String retString = "";
   static String key = "";
   static String OTP = "";
+  static JLabel label;
+  static JFrame frame;
+  static JPanel panel;
 
   public static void main(String[] args) {
     run(args);
@@ -539,18 +542,20 @@ public class Main {
     JButton btnTestBattery = new JButton("Test Battery");
 
     // JLabel
-    JLabel label = new JLabel("OTP");
+    label = new JLabel("OTP");
+    JLabel output = new JLabel("");
 
     // JPanel
     JPanel panel = new JPanel();
-    panel.add(label);
     panel.add(btnOtp);
     panel.add(btnTest);
     panel.add(btnKeyGen);
     panel.add(btnTestBattery);
+    panel.add(label);
+    panel.add(output);
 
     // JFrame
-    JFrame frame = new JFrame("Crypto OTP");
+    frame = new JFrame("Crypto OTP");
     frame.getContentPane().add(panel);
 
     // Action Listeners
@@ -559,7 +564,7 @@ public class Main {
         currOTP = OTPfromSeed(prevOTP);
         prevOTP = currOTP;
         System.out.println("OTP generated: " + currOTP);
-
+        label = new JLabel(currOTP);
       }
     });
 
@@ -668,7 +673,7 @@ public class Main {
     });
 
     // Format GUI.
-    frame.setSize(500, 500);
+    frame.setSize(800, 800);
     frame.setPreferredSize(new Dimension(400, 300));
     frame.setLocationRelativeTo(null);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
